@@ -1,11 +1,23 @@
-from fastapi import FastAPI, Query
-from pydantic import BaseModel
+from fastapi import Depends, FastAPI, HTTPException
+from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
+
+import crud
+import models
+import schemas
+from database import SessionLocal, engine
+import os
+
+if not os.path.exists('.\sqlitedb'):
+    os.makedirs('.\sqlitedb')
+
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 
 origins = [
-    #"*",
+    #"http://localhost",
+    #"http://localhost:8080",
     #"http://127.0.0.1:5500",
     #"https://mathiaswouters.github.io"
 ]
@@ -19,111 +31,120 @@ app.add_middleware(
 )
 
 
-# Class
-class Car(BaseModel):
-    id: int
-    brand: str | None = None
-    model: str | None = None
-    year: str | None = Query(default=None)
-    body_type: str | None = None
-    power_hp: int | None = None
-    cylinders: int | None = None
-    liters: float | None = None
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 
-# List
-car_list = []
+# ========== GET METHODS ==========
+@app.get("/brand/")
+def get_brands(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    return crud.get_brands(db, skip=skip, limit=limit)
 
 
-# Database
-car_list.append(Car(id=1, brand="Toyota", model="Land Cruiser", year="2007", body_type="SUV", power_hp=381,
-                    cylinders=8, liters=5.7))
-car_list.append(Car(id=2, brand="Chevrolet", model="Colorado ZR2", year="2022", body_type="Truck", power_hp=308,
-                    cylinders=6, liters=3.6))
-car_list.append(Car(id=3, brand="Land Rover", model="Defender 110", year="2007", body_type="SUV", power_hp=122,
-                    cylinders=4, liters=2.4))
-car_list.append(Car(id=4, brand="Toyota", model="Tacoma", year="2015", body_type="Truck", power_hp=278,
-                    cylinders=6, liters=3.5))
-car_list.append(Car(id=5, brand="Ford", model="Raptor", year="2019", body_type="Truck", power_hp=213,
-                    cylinders=4, liters=2.0))
-car_list.append(Car(id=6, brand="Jeep", model="Wrangler Rubicon", year="2017", body_type="SUV", power_hp=285,
-                    cylinders=6, liters=3.6))
-car_list.append(Car(id=7, brand="RAM", model="2500", year="2019", body_type="Truck", power_hp=410, cylinders=8,
-                    liters=6.4))
+@app.get("/brand/id/{brand_id}", response_model=schemas.Brand)
+def get_brand(brand_id: int, db: Session = Depends(get_db)):
+    db_brand = crud.get_brand(db, brand_id=brand_id)
+    if db_brand is None:
+        raise HTTPException(status_code=404, detail="Brand not found")
+    return db_brand
 
 
-# GET 1 - return all cars
-@app.get("/cars")
-async def get_cars():
-    return car_list
+@app.get("/brand/name/{brand_name}", response_model=schemas.Brand)
+def get_brand_name(brand_name: str, db: Session = Depends(get_db)):
+    db_brand_name = crud.get_brand_name(db, brand_name=brand_name)
+    if db_brand_name is None:
+        raise HTTPException(status_code=404, detail="Brand not found")
+    return db_brand_name
 
 
-# GET 2 - return all cars by body type
-@app.get("/body_type/{body_type}")
-async def get_cars_by_body_type(body_type: str):
-    body = []
-    for i in car_list:
-        if i.body_type == body_type:
-            body.append(i)
-    return body
+@app.get("/model/", response_model=list[schemas.Model])
+def get_models(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    return crud.get_models(db, skip=skip, limit=limit)
 
 
-# GET 3 - return car by brand
-@app.get("/brands")
-async def get_cars_brand():
-    main = []
-    brands = []
-    for i in car_list:
-        if i.brand not in main:
-            main.append(i.brand)
-    for k in range(len(main)):
-        cars_brand = []
-        for m in car_list:
-            if m.brand == main[k]:
-                cars_brand.append(m)
-        brands.append({"brand": main[k], "cars": cars_brand})
-    return brands
+@app.get("/model/id/{model_id}", response_model=schemas.Model)
+def get_model(model_id: int, db: Session = Depends(get_db)):
+    db_model = crud.get_model(db, model_id=model_id)
+    if db_model is None:
+        raise HTTPException(status_code=404, detail="Model not found")
+    return db_model
 
 
-# POST 1 - post new car
-# EXAMPLE: http://127.0.0.1:8000/newcar/?id=8&brand=Ford&model=Mustang&year=1971&body_type=muscle&power_hp=266&cylinders
-# =8&liters=5.8
-@app.post("/newcar/")
-async def post_newcar(id: int, brand: str | None = None, model: str | None = None, year: str | None = Query(
-    default=None, min_length=4, max_length=4), body_type: str | None = None, power_hp: int | None =
-                     None, cylinders: int | None = None, liters: float | None = None):
-    for i in car_list:
-        if i.brand == brand and i.model == model and i.year == year:
-            return  {"Error": "Car already exists"}
-    new_car = Car(id=id, brand=brand, model=model, year=year, body_type=body_type, power_hp=power_hp,
-                  cylinders=cylinders, liters=liters)
-    car_list.append(new_car)
-    return new_car
+@app.get("/model/name/{model_name}", response_model=schemas.Model)
+def get_model_name(model_name: str, db: Session = Depends(get_db)):
+    db_model_name = crud.get_model_name(db, model_name=model_name)
+    if db_model_name is None:
+        raise HTTPException(status_code=404, detail="Model not found")
+    return db_model_name
 
 
-# PUT 1 -
-@app.put("/update/}")
-async def update_cars(id: int, brand: str | None = None, model: str | None = None, year: str | None = None,
-                      body_type: str | None = None, power_hp: int | None = None, cylinders: int | None = None,
-                      liters: float | None = None):
-    for i in car_list:
-        if i.id == id:
-            i.brand = brand
-            i.model = model
-            i.year = year
-            i.body_type = body_type
-            i.power_hp = power_hp
-            i.cylinders = cylinders
-            i.liters = liters
-            return i
-    return {"Error": "Car doesn't exists"}
+@app.get("/model/year/{model_year}", response_model=schemas.Model)
+def get_model_year(model_year: int, db: Session = Depends(get_db)):
+    db_model_year = crud.get_model_year(db, model_year=model_year)
+    if db_model_year is None:
+        raise HTTPException(status_code=404, detail="Models with this year not found")
+    return db_model_year
 
 
-# DELETE 1 -
-@app.delete("/delete/")
-async def delete_cars (brand: str | None = None, model: str | None = None):
-    for i in car_list:
-        if i.brand == brand and i.model == model:
-            car_list.remove(i)
-            return i
-    return {"Error": "Car doesn't exists"}
+@app.get("/model/bodytype/{model_bodytype}", response_model=schemas.Model)
+def get_model_bodytype(model_bodytype: str, db: Session = Depends(get_db)):
+    db_model_bodytype = crud.get_model_body_type(db, model_body_type=model_bodytype)
+    if db_model_bodytype is None:
+        raise HTTPException(status_code=404, detail="Models with this body type not found")
+    return db_model_bodytype
+
+
+@app.get("/model/power/{model_power}", response_model=schemas.Model)
+def get_model_power(model_power: int, db: Session = Depends(get_db)):
+    db_model_power = crud.get_model_power_hp(db, model_power_hp=model_power)
+    if db_model_power is None:
+        raise HTTPException(status_code=404, detail="Models with this power not found")
+    return db_model_power
+
+
+@app.get("/model/brand/{brand_id}", response_model=schemas.Model)
+def get_model_brand(brand_id: int, db: Session = Depends(get_db)):
+    db_model_brand = crud.get_model_brand(db, brand_id=brand_id)
+    if db_model_brand is None:
+        raise HTTPException(status_code=404, detail="Models from this brand not found")
+    return db_model_brand
+
+
+# ========== POST METHODS ==========
+@app.post("/brand/{brand_id}/model", response_model=schemas.Model)
+def create_model(brand_id: int, model: schemas.ModelCreate, db: Session = Depends(get_db)):
+    db_model = crud.get_model_name(db, model_name=model.name)
+    if db_model:
+        raise HTTPException(status_code=400, detail="Model already exists")
+    return crud.create_model(db=db, model=model, brand_id=brand_id)
+
+
+@app.post("/brand/", response_model= schemas.Brand)
+def create_brand(brand: schemas.BrandCreate, db: Session = Depends(get_db)):
+    db_brand = crud.get_brand_name(db, brand_name=brand.name)
+    if db_brand:
+        raise HTTPException(status_code=400, detail="Brand already exists")
+    return crud.create_brand(db=db, brand=brand)
+
+
+@app.post("/owner/", response_model= schemas.Owner)
+def create_owner(owner: schemas.OwnerCreate, db: Session = Depends(get_db)):
+    db_owner = crud.get_owner_name(db, owner_name=owner.name)
+    if db_owner:
+        raise HTTPException(status_code=400, detail="Owner already exists")
+    return crud.create_owner(db=db, owner=owner)
+
+# ========== PUT METHODS ==========
+
+
+# ========== DELETE METHODS ==========
+@app.delete("model/{model_id}")
+def delete_model(model_id: int, db: Session = Depends(get_db)):
+    db_model_delete = crud.get_model(db, model_id=model_id)
+    if db_model_delete is None:
+        raise HTTPException(status_code=404, detail="ID of model not found")
+    return crud.delete_model(db=db, model_id=model_id)
