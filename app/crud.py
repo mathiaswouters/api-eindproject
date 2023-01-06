@@ -1,5 +1,6 @@
 from sqlalchemy.orm import Session
 
+import auth
 import models
 import schemas
 
@@ -14,7 +15,7 @@ def get_owner_name(db: Session, owner_name: str):
 
 
 def create_owner(db: Session, owner: schemas.OwnerCreate):
-    hashed_password = owner.password + "examplehashed"
+    hashed_password = auth.get_password_hash(owner.password)
     db_owner = models.Owner(name=owner.name, hashed_password=hashed_password)
     db.add(db_owner)
     db.commit()

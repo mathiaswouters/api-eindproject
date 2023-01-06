@@ -1,12 +1,16 @@
+import os
+import crud, models, schemas, auth
+# import auth
+# import crud
+# import models
+# import schemas
+from database import SessionLocal, engine
+
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
-import crud
-import models
-import schemas
-from database import SessionLocal, engine
-import os
 
 if not os.path.exists('.\sqlitedb'):
     os.makedirs('.\sqlitedb')
@@ -14,6 +18,8 @@ if not os.path.exists('.\sqlitedb'):
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 origins = [
     #"http://localhost",
@@ -138,12 +144,25 @@ def create_owner(owner: schemas.OwnerCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Owner already exists")
     return crud.create_owner(db=db, owner=owner)
 
+
+@app.post("/token")
+def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    owner = auth.authenticate_owner(db, form_data.username, form_data.password)
+    if not owner:
+        raise HTTPException(
+            status_code=401,
+            detail="Incorrect name or password",
+            headers={"WWW-Authenticate": "Bearer"})
+    access_token = auth.create_access_token(data={"sub": owner.id})
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
 # ========== PUT METHODS ==========
 
 
 # ========== DELETE METHODS ==========
 @app.delete("model/{model_id}")
-def delete_model(model_id: int, db: Session = Depends(get_db)):
+def delete_model(model_id: int, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
     db_model_delete = crud.get_model(db, model_id=model_id)
     if db_model_delete is None:
         raise HTTPException(status_code=404, detail="ID of model not found")
