@@ -161,8 +161,8 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
 
 
 # ========== DELETE METHODS ==========
-@app.delete("model/{model_id}")
-def delete_model(model_id: int, db: Session = Depends(get_db), token: str = Depends(oauth2_scheme)):
+@app.delete("/model/{model_id}")
+def delete_model(model_id: int, db: Session = Depends(get_db)):
     db_model_delete = crud.get_model(db, model_id=model_id)
     if db_model_delete is None:
         raise HTTPException(status_code=404, detail="ID of model not found")
