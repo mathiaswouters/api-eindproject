@@ -39,6 +39,7 @@ Hier wordt de database aangemaakt en wordt er ook een URL voor gemaakt zodat je 
 
 Hier maak je de nodige classes, dit worden de SQLAlchemy models.
 Dit zijn de classes die dat ik gebruik:
+
 ![classes](./img/classes.png)
 
 Zoals je ziet heb ik ook relaties toegevoegd:
@@ -55,23 +56,32 @@ In de crud file maak ik alle nodige functies. Deze functies interageren met de g
 
 # main.py
 
-In de main.py file komen alle requests te staan die je nodig hebt. Als eerste wordt er nagekeken of dat de database file te vinden is, daarna worden alle models (tabels in de database) aangemaakt. Vervolgens wordt de bearer token aangemaakt (zie bij "auth.py"),
+In de main.py file komen alle requests te staan die je nodig hebt. Als eerste wordt er nagekeken of dat de database file te vinden is, daarna worden alle models (tabels in de database) aangemaakt. Vervolgens wordt de bearer token aangemaakt (zie bij "auth.py"),daarna komen de CORS: deze zorgen ervoor dat je resources van een ander domein gewoon op deze site kunt gebruiken. Ten slotte komen alle get, post en delete requests.
 
 # auth.py
 
+Hier maak ik eerst een secret key aan (ik heb deze uit de cursus moeten nemen omdat de installatie van het OpenSSL programma niet werkte bij mij). Daarna hash ik het ingevoerde password die dat je moet ingeven bij het aanmaken van een owner. De volgende functie vergelijkt het password met het gehashed password voor die gebruiker. De authenticatie functie kijkt eerst of dat de owner naam al in de database staat, zoja dan wordt het password gevraagd en wordt deze vergeleken met het gehashed password door de vorige functie te gebruiken. De laatste functie maakt een token aan en geeft bij deze token ook een expiring date mee, dit wordt ook elke keer nagekeken bij het gebruiken van deze functie of dat de token nog niet expired is.
+
 # Aanvullingen
+
+De aanvullingen die ik heb gedaan staan hieronder, ze zijn niet altijd helemaal gelukt
+2.1 & 2.1.1
+3.1 & 3.1.1 & 3.1.2
 
 ## Front-end
 
-In mijn front-end roep ik de 2 get functies op die dat dan de landen/steden in mijn database laten zien. Ik heb de front-end wat bewerkt met bootstrap zodat deze niet de lelijke default html style heeft.
+Ik heb een hele front-end gemaakt maar ik krijg mijn data niet op mijn webpagina. Ik weet echt niet hoe dit komt want ik heb wel voor elke request een variabele geïnitialiseerd en dan ook een functie gemaakt die dat de data van deze variabelen bijhoudt.
 
-![front-end](./img/)
+![front-end](./img/front-end.png)
 
 ## Test
 
 ### test_main.py
 
-...
+Ik heb ook test file gemaakt, die dat al mijn get, post en delete requests test. Om bijvoorbeeld een get request te testen moet ik daar dan ook al de juiste gegevens bij geven en dit zorgt er dus voor dat hij alleen de request voor die gegevens test. Je kan dus zo heel veel verschillende test toevoegen voor dezelfde request maar dan wel altijd andere data invullen.
+De tests voor al mijn GET request werken, maar die voor mijn post request werken spijtig genoeg niet.
+
+![test](./img/test.png)
 
 # Postman screenshots
 
@@ -79,74 +89,76 @@ In mijn front-end roep ik de 2 get functies op die dat dan de landen/steden in m
 
 ### GET Brands
 
-![GET Brands](./img/)
+![GET Brands](./img/get_brands.png)
 
 ### GET Brand by ID
 
-![GET Brand ID](./img/)
+![GET Brand ID](./img/get_brand_id.png)
 
 ### GET Brand by Name
 
-![GET Brand Name](./img/)
+![GET Brand Name](./img/get_brand_name.png)
 
 ### GET Models
 
-![GET Models](./img/)
+![GET Models](./img/get_models.png)
 
 ### GET Model by ID
 
-![GET Model ID](./img/)
+![GET Model ID](./img/get_model_id.png)
 
 ### GET Model by Name
 
-![GET Model Name](./img/)
+![GET Model Name](./img/get_model_name.png)
 
 ### GET Model by Year
 
-![GET Model Year](./img/)
+![GET Model Year](./img/get_model_year.png)
 
 ### GET Model by Body Type
 
-![GET Model Body Type](./img/)
+![GET Model Body Type](./img/get_model_bodytype.png)
 
 ### GET Model by Power
 
-![GET Model Power](./img/)
+![GET Model Power](./img/get_model_power.png)
 
 ### GET Model by Brand ID
 
-![GET Model Brand ID](./img/)
+![GET Model Brand ID](./img/get_model_brand_id.png)
 
 ## POST Requests
 
 ### POST Model
 
-![POST Model](./img/)
+![POST Model](./img/post_model.png)
 
 ### POST Brand
 
-![POST Brand](./img/)
+![POST Brand](./img/post_brand.png)
 
 ### POST Owner
 
-![POST Owner](./img/)
+![POST Owner](./img/post_owner.png)
 
 ### POST Token
 
-![POST Token](./img/)
+![POST Token](./img/post_token.png)
 
 ## DELETE Requests
 
 ### DELETE Model
 
-![DELETE Model](./img/)
+![DELETE Model](./img/delete_model.png)
 
 # OpenAPI docs screenshots
 
-![OpenAPI docs](./img/)
+![OpenAPI docs authentication](./img/openapi_authorize.png)
+
+![OpenAPI docs](./img/openapi.png)
 
 # Links
 
-- Hosted API: [Hosted API link](https://world-ranking-service-mathiaswouters.cloud.okteto.net)
-- Front-end repo: [Front-end repo link](https://github.com/mathiaswouters/mathiaswouters.github.io)
-- Hosted front-end: [Hosted front-end link](https://mathiaswouters.github.io/)
+- Hosted API: [Hosted API link]()
+- Front-end repo: [Front-end repo link]()
+- Hosted front-end: [Hosted front-end link](https://api-eindproject-mathias-wouters.netlify.app/)
