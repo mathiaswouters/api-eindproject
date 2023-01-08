@@ -157,9 +157,6 @@ def login_for_access_token(form_data: OAuth2PasswordRequestForm = Depends(), db:
     return {"access_token": access_token, "token_type": "bearer"}
 
 
-# ========== PUT METHODS ==========
-
-
 # ========== DELETE METHODS ==========
 @app.delete("/model/{model_id}")
 def delete_model(model_id: int, db: Session = Depends(get_db)):
