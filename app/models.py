@@ -38,3 +38,4 @@ class Model(Base):
     brand_id = Column(Integer, ForeignKey("brands.id"))
 
     brand = relationship("Brand", back_populates="cars")
+

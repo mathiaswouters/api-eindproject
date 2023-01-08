@@ -22,10 +22,10 @@ app = FastAPI()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 origins = [
-    #"http://localhost",
-    #"http://localhost:8080",
-    #"http://127.0.0.1:5500",
-    #"https://mathiaswouters.github.io"
+    "http://localhost",
+    "http://localhost:8080",
+    "http://127.0.0.1:5500",
+    "https://mathiaswouters.github.io"
 ]
 
 app.add_middleware(
