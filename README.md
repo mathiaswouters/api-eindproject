@@ -159,6 +159,6 @@ De tests voor al mijn GET request werken, maar die voor mijn post request werken
 
 # Links
 
-- Hosted API: [Hosted API link]()
-- Front-end repo: [Front-end repo link]()
+- Hosted API: [Hosted API link](https://cars-mathiaswouters.cloud.okteto.net/)
+- Front-end repo: [Front-end repo link](https://github.com/mathiaswouters/api-eindproject-frontend)
 - Hosted front-end: [Hosted front-end link](https://api-eindproject-mathias-wouters.netlify.app/)
